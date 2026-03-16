@@ -261,6 +261,24 @@ const ENRICHMENTS=["Picture Study","Composer Study","Nature Study","Poetry Teati
 const READ_TYPES=["Independent","Family Read-Aloud","History","Science","Other Subject"];
 const BOOK_CATEGORIES=["All","History","Nature & Science","Literature","Poetry","Biography","Geography","Faith & Virtue","Fine Arts","Language Arts"];
 
+// App version — bump this to clear cached schedule for all users
+const APP_VERSION="2.1";
+try{
+  if(localStorage.getItem('lrp_app_version')!==APP_VERSION){
+    const keys=Object.keys(localStorage);
+    for(let i=0;i<keys.length;i++){
+      if(keys[i].startsWith('lrp_data_')){
+        try{
+          const d=JSON.parse(localStorage.getItem(keys[i])||'{}');
+          delete d.schedule;delete d.scheduleStudents;
+          localStorage.setItem(keys[i],JSON.stringify(d));
+        }catch(e){}
+      }
+    }
+    localStorage.setItem('lrp_app_version',APP_VERSION);
+  }
+}catch(e){}
+
 const BLOCK_TYPES={
   morning: {bg:"#EBF0F5",border:"#3D5166",text:"#2c3e50",label:"Morning Anchor"},
   beauty:  {bg:"#fdf5e8",border:"#B8962A",text:"#4A3400",label:"Beauty Loop"},
@@ -1348,6 +1366,7 @@ function ScheduleScreen({schedule,setSchedule,students,setStudents,mode}){
             <button onClick={()=>setEditMode(e=>!e)} style={{background:editMode?"var(--gold)":"none",border:`1px solid ${editMode?"var(--gold)":"#ddd8ce"}`,color:editMode?"var(--navy)":"var(--muted)",borderRadius:6,padding:"5px 11px",cursor:"pointer",fontFamily:"'Lato',sans-serif",fontSize:11,fontWeight:700,transition:"all .2s"}}>
               {editMode?"✓ Done":"✎ Edit"}
             </button>
+            {editMode&&<button onClick={()=>{if(window.confirm('Reset schedule to default? Notes and journal entries will be kept.')){setSchedule(makeInitialSchedule());setStudents(makeDefaultStudents());}}} style={{background:'none',border:'1px solid var(--red)',color:'var(--red)',borderRadius:6,padding:'5px 11px',cursor:'pointer',fontFamily:'Lato,sans-serif',fontSize:11,marginLeft:4}}>↺ Reset</button>}
           )}
         </div>
       </div>
